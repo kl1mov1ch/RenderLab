@@ -1,0 +1,55 @@
+<div>
+    <form method="POST" action="/add" onsubmit="return validateAddForm()">
+        <div class="menu">
+            <input type="text" id="addNameInput" name="name" placeholder="Имя">
+            <input type="tel" id="addNumberInput" name="number" placeholder="Номер">
+        </div>
+        <div class="menu">
+            <button id="addSubmitButton" type="submit" >Добавить</button>
+            <button type="button" onclick="{{exit}}">Отмена</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function validateAddForm() {
+        let name = document.getElementById('addNameInput').value;
+        let number = document.getElementById('addNumberInput').value;
+
+        let addButton = document.getElementById('addSubmitButton');
+
+        // Проверка на пустые строки для имени и номера телефона
+        if (name === "" || number === "") {
+            addButton.disabled = true;
+            addButton.style.opacity = 0.5;
+            return false; // Отмена отправки формы
+        }
+
+        // Проверка на валидность номера телефона
+        if (!validatePhoneNumber(number)) {
+            addButton.disabled = true;
+            addButton.style.opacity = 0.5;
+            return false; // Отмена отправки формы
+        }
+
+        // Проверка на валидность имени
+        if (!validateName(name)) {
+            addButton.disabled = true;
+            addButton.style.opacity = 0.5;
+            return false; // Отмена отправки формы
+        }
+
+        // Если все проверки пройдены, разрешаем отправку формы
+        return true;
+    }
+
+    function validatePhoneNumber(number) {
+        let phoneNumberPattern = /^[0-9]{7}$/;
+        return phoneNumberPattern.test(number);
+    }
+
+    function validateName(name) {
+        let namePattern = /^[a-zA-Zа-яА-ЯёЁ]+$/;
+        return namePattern.test(name);
+    }
+</script>

@@ -1,0 +1,96 @@
+<div>
+    <form action="/update/{{ user.id }}" method="POST">
+        <div class="menu">
+            <input type="hidden" name="id" value="{{user.id}}">
+            <input id="updateNameInput" value="{{user.name}}" name="name" type="text" onchange="blockRemoveUpdate()" onclick="blockRemoveUpdate()" placeholder="Имя">
+            <input id="updateNumberInput" value="{{user.number}}" name="number" type="tel" onchange="blockRemoveUpdate()" onclick="blockRemoveUpdate()" placeholder="Номер">
+        </div>
+        <div class="menu">
+            <button id="updateSubmitButton" type="submit" onmouseenter="validateUpdateForm()">Изменить</button>
+            <button id="deleteButton" type="button" onmouseenter="validateUpdateForm()" onclick="deleteUser('{{user.id}}')">Удалить</button>
+            <button type="button" onclick="{{exit}}">Отказаться</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let originalName = null;
+    let originalNumber = null;
+
+    function deleteUser(userId) {
+        fetch(`/delete/${userId}`, {
+            method: 'POST'
+        })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Удаление элемента из DOM
+                        const userElement = document.getElementById(userId);
+                        if (userElement) {
+                            userElement.remove();
+                            console.log('User deleted successfully');
+                        } else {
+                            console.log('User element not found');
+                        }
+
+                        // Удаление пользователя из формы (если применимо)
+                        const updateForm = document.getElementById('updateForm');
+                        if (updateForm && updateForm.dataset.userId === userId) {
+                            updateForm.reset();
+                        }
+                    } else {
+                        console.log('Failed to delete user');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+    }
+
+    function blockRemoveUpdate() {
+        if (originalName === null)
+            originalName =  document.getElementById('updateNameInput').value;
+        if (document.getElementById('updateNameInput').value !== originalName)
+            document.getElementById('deleteButton').disabled = true;
+        if (document.getElementById('updateNameInput').value === originalName)
+            document.getElementById('deleteButton').disabled = false;
+    }
+
+    function validateAddForm() {
+        let name = document.getElementById('addNameInput').value;
+        let number = document.getElementById('addNumberInput').value;
+
+        if (name === "" || number === "" || !isNaN(name) || !validatePhoneNumber(number) || !validateName(name)) {
+            document.getElementById('addSubmitButton').disabled = true;
+            document.getElementById('addSubmitButton').style.opacity = 0.5;
+        } else {
+            document.getElementById('addSubmitButton').disabled = false;
+            document.getElementById('addSubmitButton').style.opacity = 1;
+        }
+    }
+
+    function validateUpdateForm() {
+        let name = document.getElementById('updateNameInput').value;
+        let number = document.getElementById('updateNumberInput').value;
+
+        if (name === "" || number === "" || !isNaN(name) || !validatePhoneNumber(number) || !validateName(name)) {
+            document.getElementById('updateSubmitButton').disabled = true;
+            document.getElementById('updateSubmitButton').classList.add('disabled-button');
+        } else {
+            document.getElementById('updateSubmitButton').disabled = false;
+            document.getElementById('updateSubmitButton').classList.remove('disabled-button');
+        }
+    }
+
+    function validatePhoneNumber(number) {
+        let belarusPattern = new RegExp("^[0-9]{7}$");
+        let russiaPattern = new RegExp("^[0-9]{7}$");
+
+        return belarusPattern.test(number) || russiaPattern.test(number);
+    }
+
+    function validateName(name) {
+        let namePattern = new RegExp("^[a-zA-Zа-яА-ЯёЁ]+$");
+        return namePattern.test(name);
+    }
+</script>
